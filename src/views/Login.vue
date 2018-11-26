@@ -10,7 +10,10 @@
         <el-input v-model="formData.username"></el-input>
       </el-form-item>
       <el-form-item label="密码">
-        <el-input type="password" v-model="formData.password"></el-input>
+        <!-- 组件, vue有自己的事件机制,用的是vue事件机制实现的keyup事件-->
+        <!--想使用DOM中的keyup事件
+        native是告诉组件,我要使用原生的DOM事件 -->
+        <el-input @keyup.enter.native="hanldeLogin" type="password" v-model="formData.password"></el-input>
       </el-form-item>
       <el-form-item>
         <el-button class="btn" type="primary" @click="hanldeLogin">登录</el-button>
@@ -20,9 +23,11 @@
 </template>
 
 <script>
+/* eslint-disable func-call-spacing,no-unexpected-multiline,standard/object-curly-even-spacing */
+
 import axios from 'axios';
 export default {
-  data() {
+  data () {
     return {
       formData: {
         username: '',
@@ -31,32 +36,61 @@ export default {
     };
   },
   methods: {
-    hanldeLogin() {
-      axios
-        .post('http://localhost:8888/api/private/v1/login', this.formData)
-        .then((response) => {
-          // response 的样子
-          // { data: , status: 200 headers: {}.....}
-          // response.data的样子,服务器返回的数据
-          // (data: , meta: {msg:'',status: 200}}
-          var status = response.data.meta.status;
-          var msg = response.data.meta.msg;
-
-          if (status === 200) {
-            // 登录成功
-            // 提示
-            this.$message.success(msg);
-            // 记录token
-            var token = response.data.data.token;
-            sessionStorage.setItem('token', token);
-            // 跳转到后台首页
-          } else {
-            // 登录失败
-            this.$message.error(msg);
-          }
-        }).catch((err) => {
-          console.log(err);
-        });
+  //   hanldeLogin() {
+  //     axios
+  //       .post('http://localhost:8888/api/private/v1/login', this.formData)
+  //       .then((response) => {
+  //         // response 的样子
+  //         // { data: , status: 200 headers: {}.....}
+  //         // response.data的样子,服务器返回的数据
+  //         // (data: , meta: {msg:'',status: 200}}
+  //         var status = response.data.meta.status;
+  //         var msg = response.data.meta.msg;
+  //
+  //         if (status === 200) {
+  //           // 登录成功
+  //           // 提示
+  //           this.$message.success(msg);
+  //           // 记录token
+  //           var token = response.data.data.token;
+  //           sessionStorage.setItem('token', token);
+  //           // 跳转到后台首页
+  //         } else {
+  //           // 登录失败
+  //           this.$message.error(msg);
+  //         }
+  //       }).catch((err) => {
+  //         console.log(err);
+  //       });
+  //   }
+  // }
+    async hanldeLogin () {
+      if (this.formData.username === '') {
+        this.$message.error('请输入用户名');
+        return;
+      } else if (this.formData.password === '') {
+        this.$message.error('请输入密码');
+        return;
+      }
+      var response = await axios.post
+      ('http://localhost:8888/api/private/v1/login', this.formData);
+      // var status = response.data.meta.status;
+      // var msg = response.data.meta.msg;
+      var {data: { meta: {status, msg}}} = response;
+      if (status === 200) {
+        // 登录成功
+        // 提示
+        this.$message.success(msg);
+        // var {data: { data: {token}}} = response;
+        // 记录token
+        var token = response.data.data.token;
+        sessionStorage.setItem('token', token);
+        // 跳转到后台首页
+        this.$router.push('/');
+      } else {
+        // 登录失败
+        this.$message.error(msg);
+      }
     }
   }
 };
