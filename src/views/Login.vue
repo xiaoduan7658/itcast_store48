@@ -25,7 +25,6 @@
 <script>
 /* eslint-disable func-call-spacing,no-unexpected-multiline,standard/object-curly-even-spacing */
 
-import axios from 'axios';
 export default {
   data () {
     return {
@@ -72,7 +71,7 @@ export default {
         this.$message.error('请输入密码');
         return;
       }
-      var response = await axios.post
+      var response = await this.$http.post
       ('http://localhost:8888/api/private/v1/login', this.formData);
       // var status = response.data.meta.status;
       // var msg = response.data.meta.msg;
